@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+//定义答案字典
 type result map[string]string
 
 var res result
@@ -36,13 +37,20 @@ func getRes(res result, filePath string) result {
 	return res
 }
 
-func ans(num string) {
+func ans(num, line string) {
 	var choose string
 	fmt.Print("请选择: ")
 	fmt.Scanln(&choose)
-	fmt.Println("你的选择是", choose)
+	//fmt.Println("你的选择是", choose)
+	//打错了保存到错题文件
 	if choose != res[num] {
-		fmt.Println("打错了, 正确答案为: ", res[num])
+		//fmt.Println("打错了, 正确答案为: ", res[num])
+		file, err := os.OpenFile("ansErrof.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		if err != nil {
+			exit("创建错题文件失败")
+		}
+		info := line + "你的选的的是: " + choose + " 正确答案为: " + res[num] + "\n\n"
+		file.WriteString(info)
 	}
 }
 
@@ -60,8 +68,9 @@ func getProblem(filepath string) {
 		num := line[:2]
 		if errR != nil {
 			if b != nil {
-				fmt.Println(string(b))
-				ans(num)
+				fmt.Println(line)
+				line = line + "\n#"
+				ans(num, line)
 			}
 			if errR == io.EOF {
 				//fmt.Println(string(b))
@@ -74,7 +83,7 @@ func getProblem(filepath string) {
 		//num := line[:2]
 		//fmt.Println("num: ", num)
 		fmt.Println(line[:len(line)-1])
-		ans(num)
+		ans(num, line)
 	}
 }
 
