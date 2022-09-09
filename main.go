@@ -7,6 +7,13 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
+)
+
+//统计题目数量
+var (
+	count    float64
+	errCount float64
 )
 
 //定义答案字典
@@ -45,6 +52,7 @@ func ans(num, line string) {
 	//打错了保存到错题文件
 	if choose != res[num] {
 		//fmt.Println("打错了, 正确答案为: ", res[num])
+		errCount++
 		file, err := os.OpenFile("ansErrof.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 		if err != nil {
 			exit("创建错题文件失败")
@@ -65,10 +73,12 @@ func getProblem(filepath string) {
 		//遇到\n结束读取
 		b, errR := buf.ReadBytes('#')
 		line := regexp.MustCompile(`[\t\r\n]+`).ReplaceAllString(strings.TrimSpace(string(b)), "\n")
-		num := line[:2]
+		index := strings.Index(line, ".")
+		num := line[:index]
 		if errR != nil {
 			if b != nil {
 				fmt.Println(line)
+				count++
 				line = line + "\n#"
 				ans(num, line)
 			}
@@ -83,6 +93,7 @@ func getProblem(filepath string) {
 		//num := line[:2]
 		//fmt.Println("num: ", num)
 		fmt.Println(line[:len(line)-1])
+		count++
 		ans(num, line)
 	}
 }
@@ -95,7 +106,22 @@ func startAnswer() {
 	getProblem("problem")
 }
 
+func printInfo(time float64, count, errcount float64) {
+	correct := count - errcount
+
+	fmt.Printf("答题结束,题目总数为: %.1f, 错误题数: %.1f, 正确题数量为: %.1f, 正确率为: %.2f%%, 耗时: %.2f分钟\n", count, errcount, correct, correct/count*100, time)
+}
+
 func main() {
+	//删除之前的错题
+	os.Remove("ansErrof.txt")
+	startTime := time.Now()
 	//开始答题
 	startAnswer()
+
+	//fmt.Println(time.Since(startTime))
+	t := time.Since(startTime)
+	time := t.Minutes()
+	//fmt.Printf("答题结束,耗时: %.2f分钟\n", t.Minutes())
+	printInfo(time, count, errCount)
 }
