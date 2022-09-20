@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>开始答题</title>
+</head>
+<body>
+<a href="/add">添加题目</a>
+<form action="/check" method="post">
+    {{ range . }}
+    <p>{{ .ID }}: {{ .Question }}</p> <br>
+    <input type="radio" name="{{ .ID }}" value="A">A.{{ .A }}<br>
+    <input type="radio" name="{{ .ID }}" value="B">B.{{ .B }}<br>
+    {{ if eq "" .C }} {{ else }} <input type="radio" name="{{ .ID }}" value="C">C.{{ .C }}<br> {{ end }}
+    {{ if eq "" .D }} {{ else }} <input type="radio" name="{{ .ID }}" value="D">D.{{ .D }}<br> {{ end }}
+
+    <p>答案: {{ .Answer }}</p>
+    {{ end }}
+    <input type="submit" value="提交">
+</form>
+</body>
+</html>
